@@ -2,6 +2,11 @@ package math;
 
 import java.util.Iterator;
 
+import math.exceptions.InvalidOrientationException;
+import math.exceptions.LongMinorVectorException;
+import math.exceptions.MinorVectorException;
+import math.exceptions.ShortMinorVectorException;
+
 /**
  * JaggedMatrix
  * 

@@ -388,7 +388,7 @@ public class MatrixANN<E extends Number> {
 		ann.activationFunction = new SigmoidFunction();
 		int trainSize = 100;
 		double accuracy = 0;
-		int runs = 10;
+		int runs = 1;
 		for (int j = 0; j < runs; j++) {
 			for (int i = 0; i < trainSize; i++) {
 				Double[] input = ArrayConversionUtils.numbersToDoubles(LogicalAND.randomInputs());
@@ -421,12 +421,8 @@ public class MatrixANN<E extends Number> {
 				ann.setInputs(input);
 				ann.processLayers();
 				System.out.println(ann);
-				accuracy += 1
-						- ann.error(ArrayConversionUtils.numbersToDoubles(LogicalAND.output(input)), ann.getOutput());
 			}
 		}
-		accuracy /= (runs * LogicalAND.possibleInputs.length);
-		System.out.println("accuracy: " + accuracy);
 	}
 
 	public static void main(String[] args) {

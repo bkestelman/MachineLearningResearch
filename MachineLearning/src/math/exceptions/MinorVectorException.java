@@ -1,4 +1,4 @@
-package math;
+package math.exceptions;
 
 /**
  * Thrown when you do something stupid with minor vectors

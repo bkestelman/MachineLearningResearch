@@ -1,5 +1,7 @@
 package math;
 
+import math.exceptions.DifferentLengthsException;
+
 /**
  * Vector math
  * 

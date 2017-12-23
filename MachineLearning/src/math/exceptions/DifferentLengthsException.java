@@ -1,4 +1,4 @@
-package math;
+package math.exceptions;
 
 /**
  * Thrown when a method expects multiple lists or arrays to have equal length, but they do not

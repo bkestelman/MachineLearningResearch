@@ -1,4 +1,4 @@
-package math;
+package math.exceptions;
 
 /**
  * Thrown if a JaggedMatrix has an orientation which is not defined among the possible orientations

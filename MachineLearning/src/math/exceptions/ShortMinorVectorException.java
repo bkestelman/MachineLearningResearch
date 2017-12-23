@@ -1,4 +1,4 @@
-package math;
+package math.exceptions;
 
 /**
  * Thrown when you try to set a minor vector to a length shorter than it previously was

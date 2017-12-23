@@ -1,7 +1,7 @@
 package ann;
 
 import math.JaggedMatrix;
-import math.MinorVectorException;
+import math.exceptions.MinorVectorException;
 
 /**
  * Layers for ANN

@@ -1,6 +1,7 @@
 package math;
 
 import ann.ActivationFunction;
+import math.exceptions.MinorVectorException;
 
 /**
  * Rectangular implementation of JaggedMatrix
