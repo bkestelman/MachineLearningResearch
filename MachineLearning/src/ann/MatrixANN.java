@@ -45,6 +45,7 @@ public class MatrixANN<E extends Number> {
 	private double testStepSize = 0.1;
 	private double stepFactor = 1000;
 	private ActivationFunction activationFunction = null;
+	private ErrorFunction<E> errorFunction = new SquareDiffError<>();
 
 	/**
 	 * Builds MatrixANN, one parameter at a time
@@ -74,6 +75,11 @@ public class MatrixANN<E extends Number> {
 		public MatrixANNBuilder activationFunction(ActivationFunction func) {
 			ann.activationFunction = func;
 			return this;
+		}
+		
+		public MatrixANNBuilder errorFunction(ErrorFunction func) {
+			ann.errorFunction = func;
+			return this; 	
 		}
 
 		/**
@@ -207,22 +213,6 @@ public class MatrixANN<E extends Number> {
 	}
 
 	/**
-	 * Error function between two arrays (sum of square differences)
-	 * 
-	 * @param a
-	 * @param b
-	 * @return
-	 */
-	public double error(E[] a, E[] b) {
-		double err = 0;
-		for (int i = 0; i < a.length; i++) {
-			double diff = a[i].doubleValue() - b[i].doubleValue();
-			err += diff * diff;
-		}
-		return err;
-	}
-
-	/**
 	 * Try adjusting each weight, processLayers, compare error to previous error
 	 * {@code prevErr}, mark weights for change. They will be changed simultaneously 
 	 * in commitChanges()
@@ -238,7 +228,7 @@ public class MatrixANN<E extends Number> {
 					System.out.println("Before increase weight: " + getOutput()[0]);
 					weights[w].addTo(r, c, testStepSize);
 					processLayers();
-					double err = error(correctOutput, getOutput());
+					double err = errorFunction.error(correctOutput, getOutput());
 					System.out.println("After increase weight: " + getOutput()[0]);
 					weights[w].addTo(r, c, -testStepSize);
 					if (simultaneousChanges) {
@@ -278,7 +268,7 @@ public class MatrixANN<E extends Number> {
 			biases[b] = biases[b].doubleValue() + testStepSize;
 			processLayers();
 			biases[b] = biases[b].doubleValue() - testStepSize;
-			double err = error(correctOutput, getOutput());
+			double err = errorFunction.error(correctOutput, getOutput());
 			if (simultaneousChanges) {
 				if (err < prevErr)
 					biasChanges[b] = stepSize(err, prevErr);
@@ -320,7 +310,7 @@ public class MatrixANN<E extends Number> {
 	public void train(E[] input, E[] correctOutput) {
 		setInputs(input);
 		processLayers();
-		double prevErr = error(correctOutput, getOutput());
+		double prevErr = errorFunction.error(correctOutput, getOutput());
 		adjustWeights(prevErr, correctOutput);
 		adjustBiases(prevErr, correctOutput);
 		commitChanges();
