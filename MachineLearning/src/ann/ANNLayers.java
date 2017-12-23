@@ -3,13 +3,29 @@ package ann;
 import math.JaggedMatrix;
 import math.MinorVectorException;
 
+/**
+ * Layers for ANN
+ * Implemented as COL_ROW JaggedMatrix
+ * 
+ * @author Benito
+ *
+ * @param <E>
+ */
 public class ANNLayers<E extends Number> extends JaggedMatrix<E> {
 
+	/**
+	 * Set up JaggedMatrix of appropriate size and initialize nodes to 0
+	 * @param layerSizes array containing size of each layer
+	 */
 	public ANNLayers(int[] layerSizes) {
 		super(layerSizes.length, COL_ROW);
 		initLayers(layerSizes);
 	}
 	
+	/**
+	 * Initialize nodes to 0
+	 * @param layerSizes array containing size of each layer
+	 */
 	public void initLayers(int[] layerSizes) {
 		for(int layer = 0; layer < layerSizes.length; layer++) {
 			matrix[layer] = new Number[layerSizes[layer]];
@@ -19,6 +35,14 @@ public class ANNLayers<E extends Number> extends JaggedMatrix<E> {
 		}
 	}
 	
+	/**
+	 * Set a layer
+	 * 
+	 * This should throw an exception if attempting to change layer size (as that would mean some weight matrices
+	 * in the ANN need to be fixed)
+	 * @param c
+	 * @param col
+	 */
 	public void setLayer(int c, E[] col) {
 		try {
 			super.setCol(c, col);
@@ -36,18 +60,11 @@ public class ANNLayers<E extends Number> extends JaggedMatrix<E> {
 		return super.getCol(layer);
 	}
 	
-	/*
-	public String toString() {
-		StringBuilder ret = new StringBuilder();
-		for(int r = 0; r < matrix.length; r++) {
-			for(int c = 0; c < matrix[r].length; c++) {
-				ret.append(matrix[r][c] + "  ");
-			}
-			ret.append("\n");
-		}
-		return ret.toString();
-	}*/
-	
+	/**
+	 * This doesn't belong here
+	 * @param arr
+	 * @return
+	 */
 	public static int max(int[] arr) {
 		int max = arr[0];
 		for(int i = 0; i < arr.length; i++) {
@@ -55,8 +72,5 @@ public class ANNLayers<E extends Number> extends JaggedMatrix<E> {
 		}
 		return max;
 	}
-	
-	public static void test() {
-		
-	}
+
 }
