@@ -427,7 +427,6 @@ public class MatrixANN<E extends Number> {
 		}
 		accuracy /= (runs * LogicalAND.possibleInputs.length);
 		System.out.println("accuracy: " + accuracy);
-
 	}
 
 	public static void main(String[] args) {
