@@ -25,7 +25,7 @@ public class Matrix<E extends Number> extends JaggedMatrix<E> {
 		for(int r = 0; r < rows; r++) {
 			matrix[r] = new Number[cols];
 			for(int c = 0; c < cols; c++) {
-				matrix[r][c] = 0;
+				matrix[r][c] = 0; // TODO: don't do this here, provide separate init method
 			}
 		}
 	}
@@ -47,6 +47,13 @@ public class Matrix<E extends Number> extends JaggedMatrix<E> {
 			// Since all MajorVectors are the same length and all MinorVectors are the same length in a Matrix, setCol should never actually throw a MinorVectorException
 			e.printStackTrace(); // if it somehow does happen, something went horribly wrong, crash the program
 		}
+	}
+	
+	public void set(int r, int c, E val) {
+		matrix[r][c] = val;
+	}
+	public E get(int r, int c) {
+		return (E) matrix[r][c];
 	}
 	
 	public int numRows() {

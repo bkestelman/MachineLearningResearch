@@ -46,6 +46,7 @@ public class MatrixANN<E extends Number> {
 	private double stepFactor = 1000;
 	private ActivationFunction activationFunction = null;
 	private ErrorFunction<E> errorFunction = new SquareDiffError<>();
+	private TrainingAlgorithm trainingAlg = new NaiveTraining();
 
 	/**
 	 * Builds MatrixANN, one parameter at a time
@@ -142,11 +143,40 @@ public class MatrixANN<E extends Number> {
 	public Matrix[] getWeights() {
 		return weights;
 	}
+	public Matrix getWeights(int w) {
+		return weights[w];
+	}
 
 	public E[] getBiases() {
 		return (E[]) biases;
 	}
+	public E getBias(int b) {
+		return (E) biases[b];
+	}
+	public void setBias(int b, E bias) {
+		biases[b] = bias;
+	}
+	public void setBiasChange(int b, E bias) {
+		biasChanges[b] = bias;
+	}
 
+	public Matrix[] getWeightChanges() {
+		return weightChanges;
+	}
+	public Matrix getWeightChanges(int w) {
+		return weightChanges[w];
+	}
+	
+	public E[] getBiasChanges() {
+		return (E[]) biasChanges;
+	}
+	public E getBiasChange(int b) {
+		return (E) biasChanges[b];
+	}
+	
+	public double getTestStepSize() {
+		return testStepSize;
+	}
 	public boolean getSimultaneousChanges() {
 		return simultaneousChanges;
 	}
@@ -172,11 +202,13 @@ public class MatrixANN<E extends Number> {
 	 */
 	public void initBiases() {
 		biases = new Number[layers.numLayers() - 1];
+		if (simultaneousChanges)
+			biasChanges = new Number[layers.numLayers() - 1];
 		for (int i = 0; i < biases.length; i++) {
 			biases[i] = 0;
+			if (simultaneousChanges) biasChanges[i] = 0;
 		}
-		if (simultaneousChanges)
-			biasChanges = new Number[weights.length];
+		
 	}
 
 	/**
@@ -213,42 +245,6 @@ public class MatrixANN<E extends Number> {
 		layers.setLayer(layer + 1, weights[layer].multFunc(layers.getLayer(layer), biases[layer], func));
 	}
 
-	/**
-	 * Try adjusting each weight, processLayers, compare error to previous error
-	 * {@code prevErr}, mark weights for change. They will be changed simultaneously
-	 * in commitChanges()
-	 * 
-	 * @param prevErr
-	 * @param correctOutput
-	 */
-	public void adjustWeights(double prevErr, E[] correctOutput) {
-		System.out.println("correctOutput " + correctOutput[0]);
-		for (int w = 0; w < weights.length; w++) { // loop through each weight matrix in ann
-			for (int r = 0; r < weights[w].numRows(); r++) { // loop through each weight in weight matrix
-				for (int c = 0; c < weights[w].numCols(); c++) {
-					System.out.println("Before increase weight: " + getOutput()[0]);
-					weights[w].addTo(r, c, testStepSize);
-					processLayers();
-					double err = errorFunction.error(correctOutput, getOutput());
-					System.out.println("After increase weight: " + getOutput()[0]);
-					weights[w].addTo(r, c, -testStepSize);
-					if (simultaneousChanges) {
-						if (err < prevErr)
-							weightChanges[w].set(r, c, stepSize(err, prevErr));
-						else
-							weightChanges[w].set(r, c, -stepSize(err, prevErr));
-					} else {
-						if (err < prevErr)
-							weights[w].addTo(r, c, stepSize(err, prevErr));
-						else
-							weights[w].addTo(r, c, -stepSize(err, prevErr));
-						prevErr = err;
-					}
-				}
-			}
-		}
-	}
-
 	public double error(E[] a, E[] b) {
 		return errorFunction.error(a, b);
 	}
@@ -263,33 +259,6 @@ public class MatrixANN<E extends Number> {
 	 */
 	public double stepSize(double err, double prevErr) {
 		return Math.abs(stepFactor * (err - prevErr) * (err - prevErr));
-	}
-
-	/**
-	 * Same as adjustWeights, for biases
-	 * 
-	 * @param prevErr
-	 * @param correctOutput
-	 */
-	public void adjustBiases(double prevErr, E[] correctOutput) {
-		for (int b = 0; b < biases.length; b++) {
-			biases[b] = biases[b].doubleValue() + testStepSize;
-			processLayers();
-			biases[b] = biases[b].doubleValue() - testStepSize;
-			double err = errorFunction.error(correctOutput, getOutput());
-			if (simultaneousChanges) {
-				if (err < prevErr)
-					biasChanges[b] = stepSize(err, prevErr);
-				else
-					biasChanges[b] = -stepSize(err, prevErr);
-			} else {
-				if (err < prevErr)
-					biases[b] = biases[b].doubleValue() + stepSize(err, prevErr);
-				else
-					biases[b] = biases[b].doubleValue() - stepSize(err, prevErr);
-				prevErr = err;
-			}
-		}
 	}
 
 	/**
@@ -317,12 +286,7 @@ public class MatrixANN<E extends Number> {
 	 * @param correctOutput
 	 */
 	public void train(E[] input, E[] correctOutput) {
-		setInputs(input);
-		processLayers();
-		double prevErr = errorFunction.error(correctOutput, getOutput());
-		adjustWeights(prevErr, correctOutput);
-		adjustBiases(prevErr, correctOutput);
-		commitChanges();
+		trainingAlg.trainOne(this, input, correctOutput);
 	}
 
 	/**
