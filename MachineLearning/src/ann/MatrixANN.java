@@ -36,7 +36,7 @@ public class MatrixANN<E extends Number> {
 	private ANNLayers layers;
 	private Matrix[] weights; // there is a matrix of weights between each pair of adjacent layers
 	private Number[] biases; // the bias gets added after the weight calculation
-	private Number[][][] weightChanges; // flag changes before making them directly on weights, to change all weights
+	private Matrix[] weightChanges; // flag changes before making them directly on weights, to change all weights
 										// "simultaneously"
 	private Number[] biasChanges;
 
@@ -138,6 +138,18 @@ public class MatrixANN<E extends Number> {
 	public E[] getOutput() {
 		return (E[]) ArrayConversionUtils.numbersToDoubles(layers.getLayer(layers.numLayers() - 1));
 	}
+	
+	public Matrix[] getWeights() {
+		return weights;
+	}
+	
+	public E[] getBiases() {
+		return (E[]) biases;
+	}
+	
+	public boolean getSimultaneousChanges() {
+		return simultaneousChanges;
+	}
 
 	/**
 	 * Creates Matrix of weights between adjacent layers
@@ -145,25 +157,14 @@ public class MatrixANN<E extends Number> {
 	public void initWeights() {
 		weights = new Matrix[layers.numLayers() - 1]; // there is a weight matrix between each layer
 		if (simultaneousChanges)
-			weightChanges = new Number[weights.length][][];
+			weightChanges = new Matrix[layers.numLayers() - 1];
 		for (int w = 0; w < weights.length; w++) {
 			int rows = layers.getLayer(w + 1).length;
 			int cols = layers.getLayer(w).length;
 			weights[w] = new Matrix(rows, cols);
-			initWeightChanges(w, rows, cols);
+			if (simultaneousChanges)
+				weightChanges[w] = new Matrix(rows, cols);
 		}
-	}
-
-	/**
-	 * Initializes corresponding matrices for marking changes before commiting
-	 * 
-	 * @param w
-	 * @param rows
-	 * @param cols
-	 */
-	public void initWeightChanges(int w, int rows, int cols) {
-		if (simultaneousChanges)
-			weightChanges[w] = new Number[rows][cols];
 	}
 
 	/**
@@ -233,9 +234,9 @@ public class MatrixANN<E extends Number> {
 					weights[w].addTo(r, c, -testStepSize);
 					if (simultaneousChanges) {
 						if (err < prevErr)
-							weightChanges[w][r][c] = stepSize(err, prevErr);
+							weightChanges[w].set(r, c, stepSize(err, prevErr));
 						else
-							weightChanges[w][r][c] = -stepSize(err, prevErr);
+							weightChanges[w].set(r, c, -stepSize(err, prevErr));
 					} else {
 						if (err < prevErr)
 							weights[w].addTo(r, c, stepSize(err, prevErr));
@@ -246,6 +247,10 @@ public class MatrixANN<E extends Number> {
 				}
 			}
 		}
+	}
+	
+	public double error(E[] a, E[] b) {
+		return errorFunction.error(a,  b);
 	}
 
 	/**
@@ -293,7 +298,7 @@ public class MatrixANN<E extends Number> {
 		for (int w = 0; w < weights.length; w++) { // loop through each weight matrix in ann
 			for (int r = 0; r < weights[w].numRows(); r++) { // loop through each weight in weight matrix
 				for (int c = 0; c < weights[w].numCols(); c++) {
-					weights[w].addTo(r, c, weightChanges[w][r][c]);
+					weights[w].addTo(r, c, weightChanges[w].get(r, c));
 				}
 			}
 		}
