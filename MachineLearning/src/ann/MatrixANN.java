@@ -37,7 +37,7 @@ public class MatrixANN<E extends Number> {
 	private Matrix[] weights; // there is a matrix of weights between each pair of adjacent layers
 	private Number[] biases; // the bias gets added after the weight calculation
 	private Matrix[] weightChanges; // flag changes before making them directly on weights, to change all weights
-										// "simultaneously"
+									// "simultaneously"
 	private Number[] biasChanges;
 
 	// default params
@@ -76,10 +76,10 @@ public class MatrixANN<E extends Number> {
 			ann.activationFunction = func;
 			return this;
 		}
-		
+
 		public MatrixANNBuilder errorFunction(ErrorFunction func) {
 			ann.errorFunction = func;
-			return this; 	
+			return this;
 		}
 
 		/**
@@ -138,15 +138,15 @@ public class MatrixANN<E extends Number> {
 	public E[] getOutput() {
 		return (E[]) ArrayConversionUtils.numbersToDoubles(layers.getLayer(layers.numLayers() - 1));
 	}
-	
+
 	public Matrix[] getWeights() {
 		return weights;
 	}
-	
+
 	public E[] getBiases() {
 		return (E[]) biases;
 	}
-	
+
 	public boolean getSimultaneousChanges() {
 		return simultaneousChanges;
 	}
@@ -215,7 +215,7 @@ public class MatrixANN<E extends Number> {
 
 	/**
 	 * Try adjusting each weight, processLayers, compare error to previous error
-	 * {@code prevErr}, mark weights for change. They will be changed simultaneously 
+	 * {@code prevErr}, mark weights for change. They will be changed simultaneously
 	 * in commitChanges()
 	 * 
 	 * @param prevErr
@@ -248,13 +248,15 @@ public class MatrixANN<E extends Number> {
 			}
 		}
 	}
-	
+
 	public double error(E[] a, E[] b) {
-		return errorFunction.error(a,  b);
+		return errorFunction.error(a, b);
 	}
 
 	/**
-	 * Calculate appropriate step size based on difference in errors. Multiply by stepFactor
+	 * Calculate appropriate step size based on difference in errors. Multiply by
+	 * stepFactor
+	 * 
 	 * @param err
 	 * @param prevErr
 	 * @return
@@ -265,6 +267,7 @@ public class MatrixANN<E extends Number> {
 
 	/**
 	 * Same as adjustWeights, for biases
+	 * 
 	 * @param prevErr
 	 * @param correctOutput
 	 */
@@ -289,7 +292,7 @@ public class MatrixANN<E extends Number> {
 		}
 	}
 
-	/** 
+	/**
 	 * Make all marked changes
 	 */
 	public void commitChanges() {
@@ -309,6 +312,7 @@ public class MatrixANN<E extends Number> {
 
 	/**
 	 * Try adjusting parts of the ANN, processLayers, minimize error
+	 * 
 	 * @param input
 	 * @param correctOutput
 	 */
