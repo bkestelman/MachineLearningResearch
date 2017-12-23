@@ -297,53 +297,6 @@ public class JaggedMatrix<E extends Number> implements Iterable<E> { // E may no
 			M.setMajorVector(i, doubles[i]); // setMajorVector is recommended over setRow and setCol because it is
 												// always safe
 		}
-		System.out.println(M);
-		System.out.println("Setting row");
-		try {
-			M.setRow(0, new Double[] { 9., 10., 11., 12. });
-		} catch (MinorVectorException e) {
-			System.err.println(e.getMessage());
-		}
-		System.out.println(M);
-		System.out.println("Setting col");
-		try {
-			M.setCol(1, new Double[] { 13., 14., 15. });
-		} catch (MinorVectorException e) {
-			System.err.println(e.getMessage());
-		}
-		System.out.println(M);
-		System.out.println("Setting col too long");
-		try {
-			M.setCol(1, new Double[] { 16., 17., 18., 19. });
-		} catch (MinorVectorException e) {
-			System.err.println(e.getMessage());
-		}
-		System.out.println(M);
-		System.out.println("Setting col too short");
-		try {
-			M.setCol(1, new Double[] { 20., 21. });
-		} catch (MinorVectorException e) {
-			System.err.println(e.getMessage());
-		}
-		System.out.println(M);
-		System.out.println("Setting far col (col too long)");
-		try {
-			M.setCol(3, new Double[] { 22., 23. });
-		} catch (MinorVectorException e) {
-			System.err.println(e.getMessage());
-		}
-		System.out.println(M);
-
-		doubles = new Double[3][];
-		doubles[0] = new Double[] { 0., 1., 2. };
-		doubles[1] = new Double[] { 3., 4. };
-		doubles[2] = new Double[] { 5., 6., 7., 8. };
-		System.out.println("Creating COL_ROW JaggedMatrix");
-		M = new JaggedMatrix(3, COL_ROW);
-		for (int i = 0; i < doubles.length; i++) {
-			M.setMajorVector(i, doubles[i]);
-		}
-		System.out.println(M);
 	}
 
 	@Override
