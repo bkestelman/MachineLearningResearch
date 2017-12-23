@@ -2,20 +2,23 @@ package math;
 
 import ann.ActivationFunction;
 
-public class Matrix extends JaggedMatrix {
+public class Matrix<E extends Number> extends JaggedMatrix<E> {
 	
 	public Matrix() {
 	}
 	
 	public Matrix(int rows, int cols) {
-		matrix = new float[rows][cols];
+		matrix = new Number[rows][cols];
 		for(int r = 0; r < rows; r++) {
-			matrix[r] = new float[cols];
+			matrix[r] = new Number[cols];
+			for(int c = 0; c < cols; c++) {
+				matrix[r][c] = 0;
+			}
 		}
 	}
 	
 	@Override
-	public void setRow(int r, float[] row) {
+	public void setRow(int r, E[] row) {
 		try {
 			super.setRow(r, row);
 		} catch (MinorVectorException e) {
@@ -24,7 +27,7 @@ public class Matrix extends JaggedMatrix {
 		}
 	}
 	@Override
-	public void setCol(int c, float[] col) {
+	public void setCol(int c, E[] col) {
 		try {
 			super.setCol(c, col);
 		} catch (MinorVectorException e) {
@@ -40,47 +43,38 @@ public class Matrix extends JaggedMatrix {
 		return matrix[0].length;
 	}
 	
-	public void addTo(int r, int c, float x) {
-		matrix[r][c] += x;
+	public void addTo(int r, int c, Number x) {
+		matrix[r][c] = matrix[r][c].doubleValue() + x.doubleValue();
 	}
 	
-	public float[] mult(float[] vector) {
-		float[] ans = new float[matrix.length];
+	public E[] mult(E[] vector) {
+		Number[] ans = new Number[matrix.length];
 		for(int r = 0; r < matrix.length; r++) {
-			ans[r] = dot(matrix[r], vector);
+			ans[r] = (E) VectorUtils.dot(matrix[r], vector);
 		}
-		return ans;
+		return (E[]) ans;
 	}
-	public float[] multAdd(float[] vector, float bias) {
-		float[] ans = new float[matrix.length];
+	public E[] multAdd(Number[] vector, Number bias) {
+		Number[] ans = new Number[matrix.length];
 		for(int r = 0; r < matrix.length; r++) {
-			ans[r] = dot(matrix[r], vector) + bias;
+			ans[r] = VectorUtils.dot(matrix[r], vector).doubleValue() + bias.doubleValue();
 		}
-		return ans;
+		return (E[]) ans;
 	}
-	public float[] multFunc(float[] vector, ActivationFunction func) {
-		float[] ans = new float[matrix.length];
+	public E[] multFunc(E[] vector, ActivationFunction func) {
+		Number[] ans = new Number[matrix.length];
 		for(int r = 0; r < matrix.length; r++) {
-			ans[r] = func.func(dot(matrix[r], vector));
+			ans[r] = func.func(VectorUtils.dot(matrix[r], vector));
 		}
-		return ans;
+		return (E[]) ans;
 	}
-	public float[] multFunc(float[] vector, float bias, ActivationFunction func) {
-		float[] ans = new float[matrix.length];
+	public E[] multFunc(E[] vector, E bias, ActivationFunction func) {
+		Number[] ans = new Number[matrix.length];
 		for(int r = 0; r < matrix.length; r++) {
-			ans[r] = func.func(dot(matrix[r], vector) + bias);
+			ans[r] = func.func(VectorUtils.dot(matrix[r], vector).doubleValue() + bias.doubleValue());
 			//if(ans[r] > 1) ans[r] = 1 / 0;
 		}
-		return ans;
-	}
-	
-	public float dot(float[] a, float[] b) {
-		if(a.length != b.length) throw new DotProductException("Vector lengths differ");
-		float ans = 0;
-		for(int i = 0; i < a.length; i++) {
-			ans += a[i]*b[i];
-		}
-		return ans;
+		return (E[]) ans;
 	}
 
 	public static void test() {
@@ -88,7 +82,7 @@ public class Matrix extends JaggedMatrix {
 		System.out.println("--------------");
 		Matrix M = new Matrix(3, 4);
 		System.out.println(M);
-		float[] inputs = {1, 2, 3};
+		Number[] inputs = {1, 2, 3};
 		M.setCol(0, inputs);
 		System.out.println(M);
 	}

@@ -1,5 +1,5 @@
 package ann;
 
 public interface ActivationFunction {
-	public float func(float z);
+	public Number func(Number z);
 }

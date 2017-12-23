@@ -2,11 +2,11 @@ package math;
 
 import java.util.Iterator;
 
-public class JaggedMatrixIterator implements Iterator<Float> {
-	private float[][] matrix;
+public class JaggedMatrixIterator<E> implements Iterator<E> {
+	private Object[][] matrix;
 	private int currentMajor, currentMinor;
 	
-	public JaggedMatrixIterator(float[][] matrix) {
+	public JaggedMatrixIterator(Object[][] matrix) {
 		this.matrix = matrix;
 		currentMajor = currentMinor = 0;
 	}
@@ -18,13 +18,13 @@ public class JaggedMatrixIterator implements Iterator<Float> {
 	}
 
 	@Override
-	public Float next() {
-		Float ret = matrix[currentMajor][currentMinor++];
+	public E next() {
+		Object ret = matrix[currentMajor][currentMinor++];
 		if(currentMinor >= matrix[currentMajor].length) {
 			currentMinor = 0;
 			currentMajor++;
 		}
-		return ret;
+		return (E) ret;
 	}
 
 }

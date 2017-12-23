@@ -3,7 +3,7 @@ package ann;
 import math.JaggedMatrix;
 import math.MinorVectorException;
 
-public class ANNLayers extends JaggedMatrix {
+public class ANNLayers<E extends Number> extends JaggedMatrix<E> {
 
 	public ANNLayers(int[] layerSizes) {
 		super(layerSizes.length, COL_ROW);
@@ -12,11 +12,14 @@ public class ANNLayers extends JaggedMatrix {
 	
 	public void initLayers(int[] layerSizes) {
 		for(int layer = 0; layer < layerSizes.length; layer++) {
-			matrix[layer] = new float[layerSizes[layer]];
+			matrix[layer] = new Number[layerSizes[layer]];
+			for(int node = 0; node < matrix[layer].length; node++) {
+				matrix[layer][node] = 0;
+			}
 		}
 	}
 	
-	public void setLayer(int c, float[] col) {
+	public void setLayer(int c, E[] col) {
 		try {
 			super.setCol(c, col);
 		} catch (MinorVectorException e) {
@@ -29,7 +32,7 @@ public class ANNLayers extends JaggedMatrix {
 		return matrix.length;
 	}
 	
-	public float[] getLayer(int layer) {
+	public E[] getLayer(int layer) {
 		return super.getCol(layer);
 	}
 	

@@ -28,8 +28,8 @@ package math;
 
 import java.util.Iterator;
 
-public class JaggedMatrix implements Iterable<Float> {
-	protected float[][] matrix;
+public class JaggedMatrix<E extends Number> implements Iterable<E> {
+	protected Number[][] matrix;
 	private String orientation;
 
 	// possible orientations
@@ -67,6 +67,10 @@ public class JaggedMatrix implements Iterable<Float> {
 		this(majors);
 		this.orientation = orientation;
 	}
+	
+	public E[][] getMatrix() {
+		return (E[][]) matrix;
+	}
 
 	/**
 	 * Initializes matrix to store {@code majors} major vectors (either row or
@@ -75,14 +79,14 @@ public class JaggedMatrix implements Iterable<Float> {
 	 * @param majors
 	 */
 	private void initMajorAxis(int majors) {
-		matrix = new float[majors][];
+		matrix = new Number[majors][];
 	}
 
-	public void setMajorVector(int majorNum, float[] majorVector) {
+	public void setMajorVector(int majorNum, E[] majorVector) {
 		matrix[majorNum] = majorVector;
 	}
 
-	public void setMinorVector(int minorNum, float[] minorVector) throws MinorVectorException {
+	public void setMinorVector(int minorNum, E[] minorVector) throws MinorVectorException {
 		if(minorVector.length > matrix.length) 
 			throw new LongMinorVectorException();
 		for (int majorNum = 0; majorNum < matrix.length; majorNum++) {
@@ -96,7 +100,7 @@ public class JaggedMatrix implements Iterable<Float> {
 		}
 	}
 
-	public void setRow(int r, float[] row) throws MinorVectorException {
+	public void setRow(int r, E[] row) throws MinorVectorException {
 		switch (orientation) {
 		case ROW_COL:
 			setMajorVector(r, row);
@@ -109,7 +113,7 @@ public class JaggedMatrix implements Iterable<Float> {
 		}
 	}
 
-	public void setCol(int c, float[] col) throws MinorVectorException {
+	public void setCol(int c, E[] col) throws MinorVectorException {
 		switch (orientation) {
 		case ROW_COL:
 			setMinorVector(c, col);
@@ -122,22 +126,22 @@ public class JaggedMatrix implements Iterable<Float> {
 		}
 	}
 	
-	public float[] getMajorVector(int major) {
-		return matrix[major];
+	public E[] getMajorVector(int major) {
+		return (E[]) matrix[major];
 	}
-	public float[] getMinorVector(int minor) {
+	public E[] getMinorVector(int minor) {
 		int minorVectorLen = 0;
 		for(int majorNum = 0; majorNum < matrix.length; majorNum++) {
 			if(minor >= matrix[majorNum].length) break;
 			minorVectorLen++;
 		}
-		float[] minorVector = new float[minorVectorLen];
+		Object[] minorVector = new Object[minorVectorLen];
 		for(int majorNum = 0; majorNum < minorVectorLen; majorNum++) {
 			minorVector[majorNum] = matrix[majorNum][minor];
 		}
-		return minorVector; 
+		return (E[]) minorVector; 
 	}
-	public float[] getRow(int r) {
+	public E[] getRow(int r) {
 		switch (orientation) {
 		case ROW_COL:
 			return getMajorVector(r);
@@ -147,7 +151,7 @@ public class JaggedMatrix implements Iterable<Float> {
 			throw new InvalidOrientationException();
 		}
 	}
-	public float[] getCol(int c) {
+	public E[] getCol(int c) {
 		switch (orientation) {
 		case ROW_COL:
 			return getMinorVector(c);
@@ -237,65 +241,65 @@ public class JaggedMatrix implements Iterable<Float> {
 		System.out.println("Testing JaggedMatrix");
 		System.out.println("--------------------");
 		System.out.println("Creating ROW_COL JaggedMatrix");
-		JaggedMatrix M = new JaggedMatrix(3);
-		float[][] floats = new float[3][];
-		floats[0] = new float[] { 0, 1, 2 };
-		floats[1] = new float[] { 3, 4 };
-		floats[2] = new float[] { 5, 6, 7, 8 };
-		for (int i = 0; i < floats.length; i++) {
-			M.setMajorVector(i, floats[i]); // setMajorVector is recommended over setRow and setCol because it is always safe
+		JaggedMatrix<Double> M = new JaggedMatrix<>(3);
+		Double[][] doubles = new Double[3][];
+		doubles[0] = new Double[] { 0., 1., 2. };
+		doubles[1] = new Double[] { 3., 4. };
+		doubles[2] = new Double[] { 5., 6., 7., 8. };
+		for (int i = 0; i < doubles.length; i++) {
+			M.setMajorVector(i, doubles[i]); // setMajorVector is recommended over setRow and setCol because it is always safe
 		}
 		System.out.println(M);
 		System.out.println("Setting row");
 		try {
-			M.setRow(0, new float[] { 9, 10, 11, 12 });
+			M.setRow(0, new Double[] { 9., 10., 11., 12. });
 		} catch (MinorVectorException e) {
 			System.err.println(e.getMessage());
 		}
 		System.out.println(M);
 		System.out.println("Setting col");
 		try {
-			M.setCol(1, new float[] { 13, 14, 15 });
+			M.setCol(1, new Double[] { 13., 14., 15. });
 		} catch (MinorVectorException e) {
 			System.err.println(e.getMessage());
 		}
 		System.out.println(M);
 		System.out.println("Setting col too long");
 		try {
-			M.setCol(1, new float[] { 16, 17, 18, 19 });
+			M.setCol(1, new Double[] { 16., 17., 18., 19. });
 		} catch (MinorVectorException e) {
 			System.err.println(e.getMessage());
 		}
 		System.out.println(M);
 		System.out.println("Setting col too short");
 		try {
-			M.setCol(1, new float[] { 20, 21 });
+			M.setCol(1, new Double[] { 20., 21. });
 		} catch (MinorVectorException e) {
 			System.err.println(e.getMessage());
 		}
 		System.out.println(M);
 		System.out.println("Setting far col (col too long)");
 		try {
-			M.setCol(3, new float[] { 22, 23 });
+			M.setCol(3, new Double[] { 22., 23. });
 		} catch (MinorVectorException e) {
 			System.err.println(e.getMessage());
 		}
 		System.out.println(M);
 
-		floats = new float[3][];
-		floats[0] = new float[] { 0, 1, 2 };
-		floats[1] = new float[] { 3, 4 };
-		floats[2] = new float[] { 5, 6, 7, 8 };
+		doubles = new Double[3][];
+		doubles[0] = new Double[] { 0., 1., 2. };
+		doubles[1] = new Double[] { 3., 4. };
+		doubles[2] = new Double[] { 5., 6., 7., 8. };
 		System.out.println("Creating COL_ROW JaggedMatrix");
 		M = new JaggedMatrix(3, COL_ROW);
-		for (int i = 0; i < floats.length; i++) {
-			M.setMajorVector(i, floats[i]);
+		for (int i = 0; i < doubles.length; i++) {
+			M.setMajorVector(i, doubles[i]);
 		}
 		System.out.println(M);
 	}
 
 	@Override
-	public Iterator<Float> iterator() {
-		return new JaggedMatrixIterator(matrix);
+	public Iterator<E> iterator() {
+		return new JaggedMatrixIterator<E>(matrix);
 	}
 }

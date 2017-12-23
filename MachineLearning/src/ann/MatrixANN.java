@@ -3,20 +3,20 @@ package ann;
 import java.util.ArrayList;
 import java.util.List;
 
+import math.ArrayConversionUtils;
 import math.JaggedMatrix;
 import math.LogicalAND;
 import math.Matrix;
 
-public class MatrixANN {
+public class MatrixANN<E extends Number> {
 	private ANNLayers layers;
 	private Matrix[] weights;
-	private float[] biases;
-	private int maxWeightRows, maxWeightCols;
-	private float[][][] weightChanges;
-	private float[] biasChanges;
+	private Number[] biases;
+	private Number[][][] weightChanges;
+	private Number[] biasChanges;
 
-	private float testStepSize = (float) 0.1;
-	private float stepFactor = 500;
+	private double testStepSize = 0.1;
+	private double stepFactor = 500;
 	private ActivationFunction activationFunction;
 
 	public MatrixANN(int[] layerSizes) {
@@ -25,38 +25,35 @@ public class MatrixANN {
 		initBiases();
 	}
 
-	public void setInputs(float[] inputs) {
+	public void setInputs(E[] inputs) {
 		layers.setLayer(0, inputs);
 	}
 
-	public float[] getOutput() {
-		return layers.getLayer(layers.numLayers() - 1);
+	public E[] getOutput() {
+		return (E[]) layers.getLayer(layers.numLayers() - 1);
 	}
 
 	public void initWeights() {
-		maxWeightRows = 0;
-		maxWeightCols = 0;
 		weights = new Matrix[layers.numLayers() - 1]; // there is a weight matrix between each layer
-		weightChanges = new float[weights.length][][];
-		biasChanges = new float[weights.length];
+		weightChanges = new Number[weights.length][][];
+		biasChanges = new Number[weights.length];
 		for (int w = 0; w < weights.length; w++) {
 			int rows = layers.getLayer(w + 1).length;
 			int cols = layers.getLayer(w).length;
 			weights[w] = new Matrix(rows, cols);
-			if (rows > maxWeightRows)
-				maxWeightRows = rows;
-			if (cols > maxWeightCols)
-				maxWeightCols = cols;
 			initWeightChanges(w, rows, cols);
 		}
 	}
 
 	public void initWeightChanges(int w, int rows, int cols) {
-		weightChanges[w] = new float[rows][cols];
+		weightChanges[w] = new Number[rows][cols];
 	}
 
 	public void initBiases() {
-		biases = new float[layers.numLayers() - 1];
+		biases = new Number[layers.numLayers() - 1];
+		for(int i = 0; i < biases.length; i++) {
+			biases[i] = 0;
+		}
 	}
 
 	public void processLayers() {
@@ -82,16 +79,16 @@ public class MatrixANN {
 		layers.setLayer(layer + 1, weights[layer].multFunc(layers.getLayer(layer), biases[layer], func));
 	}
 
-	public float error(float[] a, float[] b) {
-		float err = 0;
+	public double error(E[] a, E[] b) {
+		double err = 0;
 		for (int i = 0; i < a.length; i++) {
-			float diff = a[i] - b[i];
+			double diff = a[i].doubleValue() - b[i].doubleValue();
 			err += diff * diff;
 		}
 		return err;
 	}
 
-	public void adjustWeights(float prevErr, float[] correctOutput) {
+	public void adjustWeights(double prevErr, E[] correctOutput) {
 		System.out.println("correctOutput " + correctOutput[0]);
 		for (int w = 0; w < weights.length; w++) { // loop through each weight matrix in ann
 			for (int r = 0; r < weights[w].numRows(); r++) { // loop through each weight in weight matrix
@@ -99,7 +96,7 @@ public class MatrixANN {
 					System.out.println("Before increase weight: " + getOutput()[0]);
 					weights[w].addTo(r, c, testStepSize);
 					processLayers();
-					float err = error(correctOutput, getOutput());
+					double err = error(correctOutput, getOutput());
 					System.out.println("After increase weight: " + getOutput()[0]);
 					weights[w].addTo(r, c, -testStepSize); 
 					if (err < prevErr)
@@ -113,16 +110,16 @@ public class MatrixANN {
 		}
 	}
 	
-	public float stepSize(float err, float prevErr) {
+	public double stepSize(double err, double prevErr) {
 		return Math.abs(stepFactor * (err-prevErr)*(err-prevErr));
 	}
 
-	public void adjustBiases(float prevErr, float[] correctOutput) {
+	public void adjustBiases(double prevErr, E[] correctOutput) {
 		for (int b = 0; b < biases.length; b++) {
-			biases[b] += testStepSize;
+			biases[b] = biases[b].doubleValue() + testStepSize;
 			processLayers();
-			biases[b] -= testStepSize;
-			float err = error(correctOutput, getOutput());
+			biases[b] = biases[b].doubleValue() - testStepSize;
+			double err = error(correctOutput, getOutput());
 			if (err < prevErr)
 				biasChanges[b] = stepSize(err, prevErr);
 				// biases[b] += stepSize(err, prevErr);
@@ -141,14 +138,14 @@ public class MatrixANN {
 			}
 		}
 		for (int b = 0; b < biases.length; b++) {
-			biases[b] += biasChanges[b];
+			biases[b] = biases[b].doubleValue() + biasChanges[b].doubleValue();
 		}
 	}
 
-	public void train(float[] input, float[] correctOutput) {
+	public void train(E[] input, E[] correctOutput) {
 		setInputs(input);
 		processLayers();
-		float prevErr = error(correctOutput, getOutput());
+		double prevErr = error(correctOutput, getOutput());
 		adjustWeights(prevErr, correctOutput);
 		adjustBiases(prevErr, correctOutput);
 		commitChanges();
@@ -177,7 +174,7 @@ public class MatrixANN {
 		System.out.println();
 	}
 
-	public static void printArr(float[] arr) {
+	public static void printArr(Number[] arr) {
 		for (int i = 0; i < arr.length; i++) {
 			System.out.print(arr[i] + "  ");
 		}
@@ -188,17 +185,17 @@ public class MatrixANN {
 		System.out.println("Testing MatrixANN");
 		System.out.println("-----------------");
 		int[] layerSizes = { 2, 2, 1 };
-		MatrixANN ann = new MatrixANN(layerSizes);
+		MatrixANN<Double> ann = new MatrixANN(layerSizes);
 		System.out.println("Creating MatrixANN");
 		System.out.println(ann);
 		System.out.println("Printing Weights");
 		ann.printWeights();
 		System.out.println("Setting inputs");
-		ann.setInputs(new float[] { 1, 0 });
+		ann.setInputs(new Double[] { 1., 0. });
 		System.out.println(ann);
 		System.out.println("Changing weights");
-		ann.weights[0].setRow(0, new float[] { 1, 2 });
-		ann.weights[0].setRow(1, new float[] { 3, 4 });
+		ann.weights[0].setRow(0, new Double[] { 1., 2. });
+		ann.weights[0].setRow(1, new Double[] { 3., 4. });
 		ann.printWeights();
 		System.out.println("Changing biases");
 		ann.biases[0] = 2;
@@ -213,18 +210,20 @@ public class MatrixANN {
 		ann.activationFunction = new SigmoidFunction();
 		int trainSize = 10000;
 		for (int i = 0; i < trainSize; i++) {
-			float[] input = LogicalAND.randomInputs();
+			Double[] input = ArrayConversionUtils.numbersToDoubles(LogicalAND.randomInputs());
 			System.out.println("Training on input");
 			printArr(input);
+			System.out.println("Setting inputs");
 			ann.setInputs(input);
-			ann.processLayers();
+			System.out.println(ann);
 			System.out.println("before training: ");
 			System.out.println(ann);
 			System.out.println("weights:");
 			ann.printWeights();
 			System.out.println("biases:");
 			ann.printBiases();
-			ann.train(input, LogicalAND.output(input));
+			ann.processLayers();
+			ann.train(input, ArrayConversionUtils.numbersToDoubles(LogicalAND.output(input)));
 			System.out.println("after training: ");
 			ann.processLayers();
 			System.out.println(ann);
@@ -235,7 +234,7 @@ public class MatrixANN {
 		}
 
 		for (int i = 0; i < LogicalAND.possibleInputs.length; i++) {
-			float[] input = LogicalAND.possibleInputs[i];
+			Double[] input = ArrayConversionUtils.numbersToDoubles(LogicalAND.possibleInputs[i]);
 			System.out.println("Testing input");
 			printArr(input);
 			ann.setInputs(input);
